@@ -8,3 +8,27 @@
 ul, ol {
   list-style-type: none;
 }
+
+table {
+  width: 100%;
+}
+
+th {
+  border: 1px solid blue;
+  width: 100px;
+}
+
+td {
+  width: 100px;
+  text-align: left;
+  border: 1px solid white;
+  padding: 5px;
+}
+
+.button {
+  background-color: yellowgreen;
+}
+
+.button__label {
+  color: black;
+}

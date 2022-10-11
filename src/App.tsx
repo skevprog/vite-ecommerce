@@ -1,57 +1,29 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { products as productsJson } from "./assets/products.json";
 import { categories } from "./assets/categories.json";
+import Menu from "./components/Menu";
+import Products from "./components/Products";
+import { Category, Product } from "./types";
 
 import "./App.css";
 
-interface Category {
-  id: number;
-  name: string;
-  sublevels?: Category[];
-}
-
-interface MenuProps {
-  categories: Category[];
-}
-
-interface MenuItemProps {
-  category: Category;
-}
-
-function MenuItem({ category }: MenuItemProps): JSX.Element {
-  const [isCollapsed, setCollapsed] = useState(true);
-
-  return (
-    <li key={category.id}>
-      <span>
-        {category.name}
-        {category.sublevels && (
-          <button className="button" onClick={() => setCollapsed(!isCollapsed)}>
-            <span className="button__label">{isCollapsed ? "+" : "-"} </span>
-          </button>
-        )}
-      </span>
-
-      {category.sublevels && !isCollapsed && <Menu categories={category.sublevels} />}
-    </li>
-  );
-}
-
-function Menu({ categories }: MenuProps): JSX.Element {
-  return (
-    <ol>
-      {categories.map((category: Category) => (
-        <MenuItem key={category.id} category={category} />
-      ))}
-    </ol>
-  );
-}
-
 function App(): JSX.Element {
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const productsByCategory: Product[] = useMemo(
+    () =>
+      productsJson.filter(
+        (product) => selectedCategory && product.sublevel_id === selectedCategory.id,
+      ),
+    [selectedCategory],
+  );
+
   return (
     <div className="App">
-      <h1> Welcome to Vite </h1>
-      <Menu categories={categories} />
+      <h1> Welcome to Vite E-commerce </h1>
+      <Menu categories={categories} onCategoryClick={(cat) => setSelectedCategory(cat)} />
+      <Products categoryName={selectedCategory?.name || ""} products={productsByCategory} />
     </div>
   );
 }
