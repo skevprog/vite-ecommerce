@@ -32,3 +32,15 @@ td {
 .button__label {
   color: black;
 }
+
+th button.ascending::after {
+  content: '⬇️';
+  display: inline-block;
+  margin-left: 1em;
+}
+
+th button.descending::after {
+  content: '⬆️';
+  display: inline-block;
+  margin-left: 1em;
+}
