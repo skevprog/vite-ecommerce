@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { Product } from "../../types";
 
@@ -14,12 +14,22 @@ interface SortConfig {
   direction: SortConfigDirection;
 }
 
+interface CartItem {
+  quantity: number;
+  product: Product;
+}
+
+interface Cart {
+  [key: string]: CartItem;
+}
+
 function Products({ products, categoryName }: ProductsProps): JSX.Element {
   const [sortedProducts, setSortedProducts] = useState<Product[]>(products);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: "available",
     direction: "ascending",
   });
+  const [shoppingCart, setShoppingCart] = useState<Cart>({});
 
   const sortedProds = useMemo(() => {
     let sortResult = [...products];
@@ -60,6 +70,25 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
     setSortedProducts(sortedProds);
   }, [sortedProds, sortConfig]);
 
+  const shoppingCartItems = useRef({});
+
+  function preventMinus(e: React.KeyboardEvent): void {
+    if (e.code === "Minus") {
+      e.preventDefault();
+    }
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>, product: Product): void {
+    shoppingCartItems.current = {
+      ...shoppingCartItems.current,
+      [e.target.name]: { quantity: e.target.value, product },
+    };
+  }
+
+  function addToBasket(): void {
+    setShoppingCart(shoppingCartItems.current);
+  }
+
   return (
     <>
       <h2>{categoryName}</h2>
@@ -97,6 +126,7 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
                   Quantity
                 </button>
               </th>
+              <th>Add to cart</th>
             </tr>
             {sortedProducts.map((product: Product) => (
               <tr key={product.id}>
@@ -104,10 +134,37 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
                 <td>{product.price}</td>
                 <td>{product.available ? "Yes" : "No"}</td>
                 <td>{product.quantity}</td>
+                <td>
+                  <input
+                    min="0"
+                    name={product.name}
+                    placeholder="0"
+                    type="number"
+                    onChange={(e) => handleChange(e, product)}
+                    onKeyPress={preventMinus}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+      {sortedProducts.length > 0 && (
+        <button type="button" onClick={addToBasket}>
+          Add to Cart
+        </button>
+      )}
+      {Object.keys(shoppingCart).length > 0 && (
+        <>
+          <h3>Cart</h3>
+          <ul>
+            {Object.keys(shoppingCart).map((item) => (
+              <li key={item}>
+                {item}: {shoppingCart[item].quantity}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </>
   );
