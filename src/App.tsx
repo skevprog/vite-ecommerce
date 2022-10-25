@@ -9,7 +9,7 @@ import { Category, Product } from "./types";
 import "./App.css";
 
 function App(): JSX.Element {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
 
   const productsByCategory: Product[] = useMemo(
     () =>
@@ -22,7 +22,11 @@ function App(): JSX.Element {
   return (
     <div className="App">
       <h1> Welcome to Vite E-commerce </h1>
-      <Menu categories={categories} onCategoryClick={(cat) => setSelectedCategory(cat)} />
+      <Menu
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryClick={(cat) => setSelectedCategory(cat)}
+      />
       <Products categoryName={selectedCategory?.name || ""} products={productsByCategory} />
     </div>
   );
