@@ -1,17 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import useSort, { SortConfigDirection, SortConfigKey } from "../../hooks/sort";
 import { Product } from "../../types";
+import { isObjectEmpty } from "../../utils";
 
 interface ProductsProps {
   products: Product[];
   categoryName: string;
-}
-
-type SortConfigKey = "available" | "price" | "quantity";
-type SortConfigDirection = "ascending" | "descending";
-interface SortConfig {
-  key: SortConfigKey;
-  direction: SortConfigDirection;
 }
 
 interface CartItem {
@@ -25,40 +20,12 @@ interface Cart {
 
 function Products({ products, categoryName }: ProductsProps): JSX.Element {
   const [sortedProducts, setSortedProducts] = useState<Product[]>(products);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({
+  const [shoppingCart, setShoppingCart] = useState<Cart>({});
+
+  const { sortedItems, setSort, sortConfig } = useSort<Product>(products, {
     key: "available",
     direction: "ascending",
   });
-  const [shoppingCart, setShoppingCart] = useState<Cart>({});
-
-  const sortedProds = useMemo(() => {
-    let sortResult = [...products];
-
-    if (!!sortConfig?.key) {
-      sortResult.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-
-        return 0;
-      });
-    }
-
-    return sortResult;
-  }, [products, sortConfig]);
-
-  function setSort(key: SortConfigKey) {
-    let direction: SortConfigDirection = "ascending";
-
-    if (key === sortConfig.key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-
-    setSortConfig({ key, direction });
-  }
 
   function getClassNameFor(name: SortConfigKey): SortConfigDirection | undefined {
     if (!sortConfig) return;
@@ -67,8 +34,8 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
   }
 
   useEffect(() => {
-    setSortedProducts(sortedProds);
-  }, [sortedProds, sortConfig]);
+    setSortedProducts(sortedItems);
+  }, [sortedItems, sortConfig]);
 
   const shoppingCartItems = useRef({});
 
@@ -154,7 +121,7 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
           Add to Cart
         </button>
       )}
-      {Object.keys(shoppingCart).length > 0 && (
+      {isObjectEmpty(shoppingCart) && (
         <>
           <h3>Cart</h3>
           <ul>
