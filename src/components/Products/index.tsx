@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import useSort, { SortConfigDirection, SortConfigKey } from "../../hooks/sort";
 import { Product } from "../../types";
 import { isObjectEmpty } from "../../utils";
+import Cart from "../Cart";
 
 interface ProductsProps {
   products: Product[];
@@ -14,13 +15,13 @@ interface CartItem {
   product: Product;
 }
 
-interface Cart {
+export interface CartItems {
   [key: string]: CartItem;
 }
 
 function Products({ products, categoryName }: ProductsProps): JSX.Element {
   const [sortedProducts, setSortedProducts] = useState<Product[]>(products);
-  const [shoppingCart, setShoppingCart] = useState<Cart>({});
+  const [shoppingCart, setShoppingCart] = useState<CartItems>({});
 
   const { sortedItems, setSort, sortConfig } = useSort<Product>(products, {
     key: "available",
@@ -124,13 +125,7 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
       {isObjectEmpty(shoppingCart) && (
         <>
           <h3>Cart</h3>
-          <ul>
-            {Object.keys(shoppingCart).map((item) => (
-              <li key={item}>
-                {item}: {shoppingCart[item].quantity}
-              </li>
-            ))}
-          </ul>
+          <Cart items={shoppingCart} />
         </>
       )}
     </>
