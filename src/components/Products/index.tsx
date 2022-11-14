@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import useSort, { SortConfigDirection, SortConfigKey } from "../../hooks/sort";
+import useSort, { SortConfigDirection } from "../../hooks/sort";
 import { Product } from "../../types";
 import { isObjectEmpty } from "../../utils";
 import Cart from "../Cart";
@@ -19,11 +19,13 @@ export interface CartItems {
   [key: string]: CartItem;
 }
 
+type SortConfigKey = "available" | "price" | "quantity";
+
 function Products({ products, categoryName }: ProductsProps): JSX.Element {
   const [sortedProducts, setSortedProducts] = useState<Product[]>(products);
   const [shoppingCart, setShoppingCart] = useState<CartItems>({});
 
-  const { sortedItems, setSort, sortConfig } = useSort<Product>(products, {
+  const { sortedItems, setSort, sortConfig } = useSort<Product, SortConfigKey>(products, {
     key: "available",
     direction: "ascending",
   });
@@ -55,6 +57,32 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
 
   function addToBasket(): void {
     setShoppingCart(shoppingCartItems.current);
+  }
+
+  // Renders sorted products
+  function renderProducts(productsData: Product[]) {
+    return productsData.map((product: Product) => {
+      const { id, name, price, available, quantity } = product;
+
+      return (
+        <tr key={id}>
+          <td>{name}</td>
+          <td>{price}</td>
+          <td>{available ? "Yes" : "No"}</td>
+          <td>{quantity}</td>
+          <td>
+            <input
+              min="0"
+              name={name}
+              placeholder="0"
+              type="number"
+              onChange={(e) => handleChange(e, product)}
+              onKeyPress={preventMinus}
+            />
+          </td>
+        </tr>
+      );
+    });
   }
 
   return (
@@ -96,24 +124,7 @@ function Products({ products, categoryName }: ProductsProps): JSX.Element {
               </th>
               <th>Add to cart</th>
             </tr>
-            {sortedProducts.map((product: Product) => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td>{product.price}</td>
-                <td>{product.available ? "Yes" : "No"}</td>
-                <td>{product.quantity}</td>
-                <td>
-                  <input
-                    min="0"
-                    name={product.name}
-                    placeholder="0"
-                    type="number"
-                    onChange={(e) => handleChange(e, product)}
-                    onKeyPress={preventMinus}
-                  />
-                </td>
-              </tr>
-            ))}
+            {renderProducts(sortedProducts)}
           </tbody>
         </table>
       )}

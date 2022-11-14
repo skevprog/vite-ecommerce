@@ -1,20 +1,19 @@
 import { useMemo, useState } from "react";
 
-export type SortConfigKey = "available" | "price" | "quantity";
 export type SortConfigDirection = "ascending" | "descending";
-interface SortConfig {
-  key: SortConfigKey;
+interface SortConfig<K extends string> {
+  key: K;
   direction: SortConfigDirection;
 }
 
-function useSort<T>(
+function useSort<T, K extends string>(
   items: T[],
-  config: SortConfig = {
-    key: "available",
+  config: SortConfig<K> = {
+    key: "available" as K,
     direction: "ascending",
   },
 ) {
-  const [sortConfig, setSortConfig] = useState<SortConfig>(config);
+  const [sortConfig, setSortConfig] = useState<SortConfig<K>>(config);
 
   const sortedItems = useMemo(() => {
     let sortResult: T[] = [...items];
@@ -35,7 +34,7 @@ function useSort<T>(
     return sortResult;
   }, [items, sortConfig]);
 
-  function setSort(key: SortConfigKey) {
+  function setSort(key: K) {
     let direction: SortConfigDirection = "ascending";
 
     if (key === sortConfig.key && sortConfig.direction === "ascending") {
